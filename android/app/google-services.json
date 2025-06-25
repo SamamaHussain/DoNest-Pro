@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "829481464602",
+    "project_id": "do-nest-app",
+    "storage_bucket": "do-nest-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:829481464602:android:072de25537716b45ea32a3",
+        "android_client_info": {
+          "package_name": "com.donest.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB8wnYdYFehtljhgA9-vyINcZKZOplABL0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
