@@ -26,13 +26,14 @@ List<DocumentSnapshot> get tasks => _tasks;
 
   Future<void> addTask({
   required String uid,
-  required String task,
+  required String title,
+  required String descp,
 }) async {
   try {
     final taskData = {
-      'task': task,
-      'createdAt': FieldValue.serverTimestamp(),
-      'isCompleted': false,
+      'title': title,
+      'descp': descp,
+      'lastUpdated': FieldValue.serverTimestamp(),
     };
 
     await FirebaseFirestore.instance
@@ -57,7 +58,7 @@ Future<void> fetchTasks(String uid) async {
         .collection('users')
         .doc(uid)
         .collection('tasks')
-        .orderBy('createdAt', descending: true)
+        .orderBy('lastUpdated', descending: true)
         .get();
 
     _tasks = querySnapshot.docs;
@@ -70,21 +71,51 @@ Future<void> fetchTasks(String uid) async {
   }
 }
 
-Future<void> updateTaskCompletion(String uid, String taskId, bool isCompleted) async {
-  this.isCompleted = isCompleted;
-  notifyListeners();
+
+Future<void> updateTask({
+  required String uid,
+  required String taskId,
+  required String title,
+  required String descp,
+}) async {
   try {
     await FirebaseFirestore.instance
         .collection('users')
         .doc(uid)
         .collection('tasks')
         .doc(taskId)
-        .update({'isCompleted': isCompleted});
+        .update({
+      'title': title,
+      'descp': descp,
+      'lastUpdated': FieldValue.serverTimestamp(),
+    });
 
-    dev.log('Task completion updated successfully for user: $uid, taskId: $taskId');
-  await fetchTasks(uid);
+    dev.log('Task updated successfully for user: $uid, taskId: $taskId');
+    await fetchTasks(uid);
   } catch (e) {
-    dev.log('Error updating task completion: $e');
+    dev.log('Error updating task: $e');
   }
+  notifyListeners();
+}
+
+Future<void> deleteTask({
+  required String uid,
+  required String taskId,
+}) async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('users')
+        .doc(uid)
+        .collection('tasks')
+        .doc(taskId)
+        .delete();
+
+    dev.log('Task deleted successfully for user: $uid, taskId: $taskId');
+    await fetchTasks(uid);
+  } catch (e) {
+    dev.log('Error deleting task: $e');
+  }
+  notifyListeners();
+
 }
 }

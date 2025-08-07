@@ -140,4 +140,5 @@ Future<void> getUserData(String uId) async {
 
 
 }
+ notifyListeners();
 }

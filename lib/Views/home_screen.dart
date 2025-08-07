@@ -1,10 +1,11 @@
 import 'dart:developer' as dev;
-
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:do_nest/Providers/auth_provider.dart';
 import 'package:do_nest/Providers/firestore_provider.dart';
+import 'package:do_nest/Views/note_edit_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
 import 'package:provider/provider.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -16,11 +17,12 @@ class HomeScreen extends StatelessWidget {
       listen: true,
     );
 
-    final dataProvider= Provider.of<FirestoreDataProvider>(
+    final dataProvider = Provider.of<FirestoreDataProvider>(
       context,
       listen: true,
     );
-    final TextEditingController tasktextController = TextEditingController();
+    final TextEditingController tasktitleController = TextEditingController();
+    final TextEditingController taskdescpController = TextEditingController();
     dev.log('Tasks: ${dataProvider.tasks.length}');
 
     String? userName = authProvider.userModel?.firstName ?? 'No user logged in';
@@ -43,69 +45,69 @@ class HomeScreen extends StatelessWidget {
         ],
       ),
       body: Center(
-       child: dataProvider.isLoading
-          ? const CircularProgressIndicator()
-          : dataProvider.tasks.isEmpty ? Center(
-            child: Text(
-              'No tasks available. Please add a task.',
-              style: TextStyle(fontSize: 18, color: Colors.grey[600]),
-            ),
-          ) :
-       ListView.builder(
-         itemCount: dataProvider.tasks.length,
-         itemBuilder: (BuildContext context, int index) {
-          dev.log('Fetching tasks for user: ${authProvider.userModel!.uId}');
-             // Assuming each task is a DocumentSnapshot
-           DocumentSnapshot task = dataProvider.tasks[index];
-             return ListTile(
-            title: Text(task['task']),
-            leading: Checkbox(
-              value: task['isCompleted'] ?? false,
-              onChanged: (bool? value) {
-                // Handle checkbox state change
-                dataProvider.updateTaskCompletion(
-                  authProvider.userModel!.uId!,
-                  task.id,
-                  value ?? false,
-                );
-              },
-            ),
-            trailing:  Text(task['createdAt'].toDate().toString(),
-           ));
-         },
-       ),
+        //  child: dataProvider.isLoading
+        //     ? const CircularProgressIndicator()
+        //     : dataProvider.tasks.isEmpty ? Center(
+        //       child: Text(
+        //         'No tasks available. Please add a task.',
+        //         style: TextStyle(fontSize: 18, color: Colors.grey[600]),
+        //       ),
+        //     ) :
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: MasonryGridView.count(
+            crossAxisCount: 2,
+            mainAxisSpacing: 8,
+            crossAxisSpacing: 8,
+            itemCount: dataProvider.tasks.length,
+            itemBuilder: (context, index) {
+              final task = dataProvider.tasks[index];
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => EditNoteScreen(taskDoc: task,)));
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.green[100],
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        task['title'] ?? 'No title provided',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        task['descp'] ?? 'No description provided',
+                        style: TextStyle(fontSize: 14),
+                      ),
+                      SizedBox(height: 6),
+                      Text(
+                        // 'Created at: ${task['createdAt']?.toDate().toString() ?? 'Unknown'}',
+                        '${timeago.format(task['lastUpdated']?.toDate() ?? DateTime.now())}',
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          // Navigate to the add task screen
-          showDialog(context: context, builder: (context) {
-            return AlertDialog(
-              title: const Text('Add Task'),
-              content: TextField(
-                decoration: const InputDecoration(hintText: 'Enter task'),
-                controller: tasktextController,
-              ),
-              actions: [
-                TextButton(onPressed: () {
-                  Navigator.of(context).pop();
-                }, child: const Text('Cancel')),
-                TextButton(onPressed: () {
-                  if (tasktextController.text.isEmpty) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Task cannot be empty')),
-                    );}
-                    else{
-                      dataProvider.addTask(uid: authProvider.userModel!.uId!, task: tasktextController.text);
-                  tasktextController.clear();
-                  Navigator.of(context).pop();
-                    }
-                }, child: const Text('OK')),
-                
-              ],
-            );
-          },);
-        },
-        child: const Icon(Icons.add),
+          Navigator.pushNamed(
+            context,
+            '/newNote',
+          );},
+          child: Icon(Icons.add),
       ),
     );
   }

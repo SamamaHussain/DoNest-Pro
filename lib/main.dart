@@ -1,6 +1,7 @@
 import 'package:do_nest/Providers/firestore_provider.dart';
 import 'package:do_nest/Views/home_screen.dart';
 import 'package:do_nest/Views/login.dart';
+import 'package:do_nest/Views/new_note_screen.dart';
 import 'package:do_nest/Views/signup.dart';
 import 'package:do_nest/auth_state.dart';
 import 'package:do_nest/firebase_options.dart';
@@ -43,6 +44,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => LoginScreen(),
         '/signup': (context) => SignupScreen(),
         '/home': (context) => HomeScreen(),
+        '/newNote': (context) => NewNoteScreen(),
       },
     );
   }
