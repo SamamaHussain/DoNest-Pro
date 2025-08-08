@@ -107,7 +107,13 @@ class HomeScreen extends StatelessWidget {
                               title: Text('Change Color'),
                               onTap: () {
                                  Navigator.of(context).pop();
-                                pickColor(context, task.id);
+                                final selectedColorCode= pickColor(context, task.id);
+                                dataProvider.updateNoteColor(authProvider.userModel!.uId!, task.id,selectedColorCode).then((_) {
+                                  showMessage(
+                                    context,
+                                    'Note color updated successfully',
+                                  );
+                                });
                                 // Show color picker dialog or perform color change action
                               },
                             ),
@@ -120,7 +126,7 @@ class HomeScreen extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.green[100],
+                    color: Color(task['color']),
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: Column(

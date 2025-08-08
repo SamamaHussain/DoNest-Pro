@@ -33,6 +33,7 @@ List<DocumentSnapshot> get tasks => _tasks;
     final taskData = {
       'title': title,
       'descp': descp,
+      'color': Colors.white30.value, // Default color
       'lastUpdated': FieldValue.serverTimestamp(),
     };
 
@@ -117,5 +118,22 @@ Future<void> deleteTask({
   }
   notifyListeners();
 
+}
+
+Future<void> updateNoteColor(String uid,String noteId, String colorValue) async {
+  try {
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .collection('notes')
+          .doc(noteId)
+          .update({'color': colorValue});
+
+      dev.log('Note color updated successfully for noteId: $noteId');
+  } catch (e) {
+    dev.log('Error updating note color: $e');
+  }
+  notifyListeners();
 }
 }
