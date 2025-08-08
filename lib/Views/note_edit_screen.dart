@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:do_nest/Providers/auth_provider.dart';
 import 'package:do_nest/Providers/firestore_provider.dart';
+import 'package:do_nest/Providers/summary_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -19,6 +20,10 @@ class EditNoteScreen extends StatelessWidget {
     );
 
     final dataProvider = Provider.of<FirestoreDataProvider>(
+      context,
+      listen: true,
+    );
+    final summaryProvider = Provider.of<SummaryProvider>(
       context,
       listen: true,
     );
@@ -69,6 +74,42 @@ class EditNoteScreen extends StatelessWidget {
           ],
         ),
       ),
+      floatingActionButton: FloatingActionButton.extended(
+  onPressed: () async{
+    // Call your summarize function here
+    await summaryProvider.fetchSummary(taskDoc['descp'], 'medium', 'en');
+    if (summaryProvider.isSummaryLoading) {
+      // Show a loading indicator or a message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Generating summary...'),
+        ),
+      );
+    }
+    else if(summaryProvider.isSummaryLoading==false){
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Summary'),
+          content: Text(summaryProvider.summary!),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Close'),
+            ),
+          ],
+        ),
+      );
+    }
+  },
+  icon: Icon(Icons.summarize_outlined),
+  label: Text('Summarize'),
+  backgroundColor: Colors.blue,
+  foregroundColor: Colors.white,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(8),
+  ),
+),
     );
   }
 }

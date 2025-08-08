@@ -1,4 +1,5 @@
 import 'package:do_nest/Providers/firestore_provider.dart';
+import 'package:do_nest/Providers/summary_provider.dart';
 import 'package:do_nest/Views/home_screen.dart';
 import 'package:do_nest/Views/login.dart';
 import 'package:do_nest/Views/new_note_screen.dart';
@@ -11,6 +12,7 @@ import 'package:provider/provider.dart';
 import 'package:do_nest/Providers/auth_provider.dart';
 
 
+
 Future<void> main() async {
 WidgetsFlutterBinding.ensureInitialized();
 await Firebase.initializeApp(
@@ -20,7 +22,8 @@ await Firebase.initializeApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => FirebaseAuthProvider()),
-        ChangeNotifierProvider(create: (_) => FirestoreDataProvider(),)
+        ChangeNotifierProvider(create: (_) => FirestoreDataProvider(),),
+        ChangeNotifierProvider(create: (_) => SummaryProvider(),),
       ],
       child: MyApp(),
     ),

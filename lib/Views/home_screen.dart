@@ -1,6 +1,8 @@
 import 'dart:developer' as dev;
 import 'package:do_nest/Providers/auth_provider.dart';
 import 'package:do_nest/Providers/firestore_provider.dart';
+import 'package:do_nest/Utils/Widgets/color_pciker.dart';
+import 'package:do_nest/Utils/Widgets/snackbar_widget.dart';
 import 'package:do_nest/Views/note_edit_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_staggered_grid_view/flutter_staggered_grid_view.dart';
@@ -21,8 +23,6 @@ class HomeScreen extends StatelessWidget {
       context,
       listen: true,
     );
-    final TextEditingController tasktitleController = TextEditingController();
-    final TextEditingController taskdescpController = TextEditingController();
     dev.log('Tasks: ${dataProvider.tasks.length}');
 
     String? userName = authProvider.userModel?.firstName ?? 'No user logged in';
@@ -64,7 +64,58 @@ class HomeScreen extends StatelessWidget {
               final task = dataProvider.tasks[index];
               return GestureDetector(
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => EditNoteScreen(taskDoc: task,)));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => EditNoteScreen(taskDoc: task),
+                    ),
+                  );
+                },
+                onLongPress: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text('Options'),
+                        content: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            ListTile(
+                              leading: Icon(Icons.delete, color: Colors.red),
+                              title: Text('Delete'),
+                              onTap: () {
+                                // Perform delete action
+                                dataProvider
+                                    .deleteTask(
+                                      uid: authProvider.userModel!.uId!,
+                                      taskId: task.id,
+                                    )
+                                    .then((_) {
+                                      showMessage(
+                                        context,
+                                        'Task deleted successfully',
+                                      );
+                                      Navigator.of(context).pop();
+                                    });
+                              },
+                            ),
+                            ListTile(
+                              leading: Icon(
+                                Icons.color_lens,
+                                color: Colors.blue,
+                              ),
+                              title: Text('Change Color'),
+                              onTap: () {
+                                 Navigator.of(context).pop();
+                                pickColor(context, task.id);
+                                // Show color picker dialog or perform color change action
+                              },
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
                 },
                 child: Container(
                   padding: const EdgeInsets.all(12),
@@ -103,11 +154,9 @@ class HomeScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          Navigator.pushNamed(
-            context,
-            '/newNote',
-          );},
-          child: Icon(Icons.add),
+          Navigator.pushNamed(context, '/newNote');
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
